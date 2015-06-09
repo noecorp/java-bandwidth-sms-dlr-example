@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    	<meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Delivery Receipt SMS</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    </head>
+
+    <body>
+        <div class="container" style="margin-top: 50px;">
+            <div class="col-md-2">
+                <strong>Message Content: </strong>
+            </div>
+            <div id="message-content" class="col-md-10" style="margin-bottom: 20px;">
+                $message
+            </div>
+
+            <div class="col-md-2">
+                <strong>Callback Events: </strong>
+            </div>
+            <div id="callback-events" class="col-md-10" style="float: right;">
+                Loading ...
+            </div>
+        </div>
+
+        <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                if (typeof(EventSource) === "undefined") {
+                    alert('Your browser do not support EventSource for async events');
+                    return;
+                }
+
+                var source = new EventSource('$statusUrl');
+
+                source.addEventListener('$callbackEvent', function(event) {
+                    $('#callback-events').text(JSON.stringify($.parseJSON(event.data), null, "\t"));
+                }, false);
+
+                source.addEventListener('$completeEvent', function(event) {
+                    $('#callback-events').text(JSON.stringify($.parseJSON(event.data), null, "\t"));
+                    source.close();
+                }, false);
+            });
+        </script>
+    </body>
+</html>
