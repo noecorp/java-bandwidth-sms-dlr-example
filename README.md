@@ -71,7 +71,7 @@ heroku config:set BANDWIDTH_API_SECRET=$BANDWIDTH_API_SECRET --app <your-app-nam
 
 Web application settings:
 ```console
-heroku config:set ALLOCATED_NUMBER=$ALLOCATED_NUMBER
+heroku config:set ALLOCATED_NUMBER=$ALLOCATED_NUMBER --app <your-app-name>
 ```
 
 Push code to Heroku:
