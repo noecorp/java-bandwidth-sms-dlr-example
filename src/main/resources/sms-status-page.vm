@@ -12,16 +12,26 @@
     <body>
         <div class="container" style="margin-top: 50px;">
             <div class="col-md-2">
-                <strong>Message Content: </strong>
+                <span style="font-size: 30px;" class="glyphicon glyphicon-send" aria-hidden="true"></span>
+                <strong  style="line-height: 30px; vertical-align: top;">&nbsp;Message:</strong>
             </div>
             <div id="message-content" class="col-md-10" style="margin-bottom: 20px;">
                 $message
             </div>
 
             <div class="col-md-2">
-                <strong>Callback Events: </strong>
+                <span style="font-size: 30px;" class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                <strong  style="line-height: 30px; vertical-align: top;">&nbsp;Sent Event:</strong>
             </div>
-            <div id="callback-events" class="col-md-10" style="float: right;">
+            <div id="sent-event" class="col-md-10" style="margin-bottom: 20px;">
+                Loading ...
+            </div>
+
+            <div class="col-md-2">
+                <span style="font-size: 30px;" class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>
+                <strong  style="line-height: 30px; vertical-align: top;">&nbsp;Receipt Event:</strong>
+            </div>
+            <div id="receipt-event" class="col-md-10" style="margin-bottom: 20px;">
                 Loading ...
             </div>
         </div>
@@ -37,12 +47,12 @@
 
                 var source = new EventSource('$statusUrl');
 
-                source.addEventListener('$callbackEvent', function(event) {
-                    $('#callback-events').text(JSON.stringify($.parseJSON(event.data), null, "\t"));
+                source.addEventListener('$sentEvent', function(event) {
+                    $('#sent-event').text(event.data);
                 }, false);
 
-                source.addEventListener('$completeEvent', function(event) {
-                    $('#callback-events').text(JSON.stringify($.parseJSON(event.data), null, "\t"));
+                source.addEventListener('$deliveredEvent', function(event) {
+                    $('#receipt-event').text(event.data);
                     source.close();
                 }, false);
             });

@@ -138,9 +138,6 @@ public class SendSmsServlet extends HttpServlet {
         }
 
         final AsyncContext asyncContext = request.startAsync();
-        asyncContext.getResponse().setContentType("text/event-stream");
-        asyncContext.getResponse().setCharacterEncoding("UTF-8");
-
         executor.scheduleAtFixedRate(new Runnable() {
 
             public void run() {
@@ -151,11 +148,19 @@ public class SendSmsServlet extends HttpServlet {
                     }
 
                     ServletResponse response = asyncContext.getResponse();
+                    response.setContentType("text/event-stream");
+                    response.setCharacterEncoding("UTF-8");
 
-                    PrintWriter printWriter = response.getWriter();
-                    printWriter.write(events.size() < 2 ? "event:sms-callback-event\n" : "event:complete-sms-callback\n");
-                    printWriter.write("data:" + formatSmsEvent(events) + "\n\n");
-                    printWriter.flush();
+                    for (SmsEvent smsEvent : events) {
+                        PrintWriter printWriter = response.getWriter();
+                        if (smsEvent.getDeliveryCode() == null) {
+                            printWriter.write("event:sent-sms-callback\n");
+                        } else {
+                            printWriter.write("event:delivered-sms-callback\n");
+                        }
+                        printWriter.write("data:" + formatSmsEvent(smsEvent) + "\n\n");
+                        printWriter.flush();
+                    }
 
                     if (events.size() >= 2) {
                         asyncContext.complete();
@@ -164,7 +169,7 @@ public class SendSmsServlet extends HttpServlet {
                     e.printStackTrace();
                 }
             }
-        }, 0, 5, TimeUnit.SECONDS);
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     private String createSmsStatusPage(final HttpServletRequest request, final Message message) {
@@ -176,8 +181,8 @@ public class SendSmsServlet extends HttpServlet {
         Template template = ve.getTemplate("/sms-status-page.vm");
         Context context = new VelocityContext();
         context.put("message", message);
-        context.put("callbackEvent", "sms-callback-event");
-        context.put("completeEvent", "complete-sms-callback");
+        context.put("sentEvent", "sent-sms-callback");
+        context.put("deliveredEvent", "delivered-sms-callback");
         context.put("statusUrl", request.getRequestURL().append("/status").append("?messageId=")
                 .append(message.getId()));
 
@@ -186,33 +191,27 @@ public class SendSmsServlet extends HttpServlet {
         return writer.toString();
     }
 
-    private String formatSmsEvent(final List<SmsEvent> events) {
-        StringBuilder builder = new StringBuilder("[");
-        for (int i = 0; i < events.size(); i++) {
-            SmsEvent smsEvent = events.get(i);
-            builder.append(i == 0 ? "{" : ",{");
+    private String formatSmsEvent(final SmsEvent smsEvent) {
+        StringBuilder builder = new StringBuilder("{");
 
-            builder.append("\"messageId\":").append("\"").append(smsEvent.getMessageId()).append("\",");
-            builder.append("\"direction\":").append("\"").append(smsEvent.getDirection()).append("\",");
-            builder.append("\"from\":").append("\"").append(smsEvent.getFrom()).append("\",");
-            builder.append("\"to\":").append("\"").append(smsEvent.getTo()).append("\",");
-            builder.append("\"text\":").append("\"").append(smsEvent.getText()).append("\",");
-            builder.append("\"state\":").append("\"").append(smsEvent.getState()).append("\",");
+        builder.append("\"messageId\":").append("\"").append(smsEvent.getMessageId()).append("\",");
+        builder.append("\"direction\":").append("\"").append(smsEvent.getDirection()).append("\",");
+        builder.append("\"from\":").append("\"").append(smsEvent.getFrom()).append("\",");
+        builder.append("\"to\":").append("\"").append(smsEvent.getTo()).append("\",");
+        builder.append("\"text\":").append("\"").append(smsEvent.getText()).append("\",");
+        builder.append("\"state\":").append("\"").append(smsEvent.getState()).append("\",");
 
-            if (smsEvent.getDeliveryState() != null) {
-                builder.append("\"deliveryState\":").append("\"").append(smsEvent.getDeliveryState()).append("\",");
-            }
-            if (smsEvent.getDeliveryCode() != null) {
-                builder.append("\"deliveryCode\":").append("\"").append(smsEvent.getDeliveryCode()).append("\",");
-            }
-            if (smsEvent.getDeliveryDescription() != null) {
-                builder.append("\"deliveryDescription\":").append("\"").append(smsEvent.getDeliveryDescription()).append("\",");
-            }
-
-            builder.append("\"messageUri\":").append("\"").append(smsEvent.getMessageUri()).append("\"");
-            builder.append("}");
+        if (smsEvent.getDeliveryState() != null) {
+            builder.append("\"deliveryState\":").append("\"").append(smsEvent.getDeliveryState()).append("\",");
         }
-        return builder.append("]").toString();
+        if (smsEvent.getDeliveryCode() != null) {
+            builder.append("\"deliveryCode\":").append("\"").append(smsEvent.getDeliveryCode()).append("\",");
+        }
+        if (smsEvent.getDeliveryDescription() != null) {
+            builder.append("\"deliveryDescription\":").append("\"").append(smsEvent.getDeliveryDescription()).append("\",");
+        }
+        builder.append("\"messageUri\":").append("\"").append(smsEvent.getMessageUri()).append("\"");
+        return builder.append("}").toString();
     }
 
     private SmsEvent getSmsEvent(HttpServletRequest request) {
