@@ -8,6 +8,13 @@
     <artifactId>bandwidth-sms-dlr-example</artifactId>
     <packaging>war</packaging>
 
+    <repositories>
+        <repository>
+            <id>oss.sonatype</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
