@@ -11,7 +11,7 @@
     <repositories>
         <repository>
             <id>oss.sonatype</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <url>https://oss.sonatype.org/content/repositories/staging</url>
         </repository>
     </repositories>
 
