@@ -11,7 +11,7 @@
     <repositories>
         <repository>
             <id>oss.sonatype</id>
-            <url>https://oss.sonatype.org/content/repositories/staging</url>
+            <url>https://oss.sonatype.org/content/repositories/releases</url>
         </repository>
     </repositories>
 
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.bandwidth.sdk</groupId>
             <artifactId>bandwidth-java-sdk</artifactId>
-            <version>1.9-SNAPSHOT</version>
+            <version>1.10</version>
             <scope>compile</scope>
         </dependency>
 
